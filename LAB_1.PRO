@@ -87,8 +87,8 @@ CLAUSES
 	father(F, C) :- man(F), parent(F, C).
 	daughter(D, P) :- woman(D), parent(P, D).
 	son(S, P) :- man(S), parent(P, S).
-	sister(S, X) :- woman(S), parent(P, S), parent(P, X).
-	brother(B, X) :- man(B), parent(P, B), parent(P, X).
+	sister(S, X) :- woman(S), parent(P, S), parent(P, X), S<>X.
+	brother(B, X) :- man(B), parent(P, B), parent(P, X), B<>X. 
 	grandmother(GM, GC) :- mother(GM, P), parent(P, GC).
 	grandfather(GF, GC) :- father(GF, P), parent(P, GC).
 	granddaughter(GD, GP) :-
@@ -123,7 +123,6 @@ CLAUSES
 	svatya(S, P) :- 
 	mother(S, X), wife(W, X), parent(P, W);
 	mother(S, X), husband(H, X), parent(P, H).
-
 	svat(S, P) :-
 	father(S, X), wife(W, X), parent(P, W);
 	father(S, X), husband(H, X), parent(P, H). 
