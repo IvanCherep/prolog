@@ -4,18 +4,18 @@ DOMAINS
 PREDICATES 
 	man(person) 
 	woman(person)
-	married(person, person) 
+	married(person, person)
 	parent(person, person) 
+	wife(person, person)
+	husband(person, person) 
 	mother(person, person)	
 	father(person, person) 
 	daughter(person, person) 
 	son(person, person) 
 	sister(person, person) 
-	brother(person, person) 
-/*	
+	brother(person, person) 	
 	grandmother(person, person) 
-	grandfather(person, person) 
-	grandparent(person, person) 
+	grandfather(person, person)  
 	granddaughter(person, person) 
 	grandson(person, person) 
 	aunt(person, person)
@@ -34,7 +34,7 @@ PREDICATES
 	dever(person, person) 
 	snoha(person, person) 
 	zyat(person, person) 
-*/
+
 CLAUSES
 	man(X) :- X = viktor; X = petere; X = philip;
 	X = guillermo; X = donald; X = vladimir;
@@ -79,6 +79,9 @@ CLAUSES
 	P = vladimir, C = alexey;
 	P = vladimir, C = ksenia;
 	P = vladimir, C = pavel.
+
+	wife(W, H) :- married(W, H).
+	husband(H, W) :- married(W, H).
 	
 	mother(M, C) :- woman(M), parent(M, C).
 	father(F, C) :- man(F), parent(F, C).
@@ -87,28 +90,52 @@ CLAUSES
 	sister(S, X) :- woman(S), parent(P, S), parent(P, X).
 	brother(B, X) :- man(B), parent(P, B), parent(P, X).
 	grandmother(GM, GC) :- mother(GM, P), parent(P, GC).
-	grandfather(GF, GC) :-	
-		
+	grandfather(GF, GC) :- father(GF, P), parent(P, GC).
+	granddaughter(GD, GP) :-
+	woman(GD), grandmother(GP, GD);
+	woman(GD), grandfather(GP, GD).
+
+	grandson(GS, GP) :-
+	man(GS), grandmother(GP, GS);
+	man(GS), grandfather(GP, GS).
+
+	aunt(AU, X) :-
+	sister(AU, P), parent(P, X);
+	wife(AU, UN), brother(UN, P), parent(P, X).	
 	
-/*
-	grandfather(GF,GS) :- parent(P,GS),parent(GF,P).
-	grandparent(GP,G) :- grandmother(GP,G);grandfather(GP,G).
-	granddaughter(GD,GP) :- grandparent(GP,GD),woman(GD).
-	grandson(GS,GP) :- grandparent(GP,GS),man(GS).
-	aunt(AU,X) :- parent(P,X),sister(AU,P); married(AU,UN),brother(UN,P),parent(P,X).
-	uncle(UNCLE,X) :- brother(UNCLE,P),parent(P,X);married(AUNT,UNCLE),sister(AUNT,P),parent(P,X).
-	niece(N,X) :- woman(N), aunt(X, N); woman(N), uncle(X, N).
-	nephew(N,X) :- man(N), aunt(X, N); man(N), uncle(X, N). 
- 	svekrov(S,X) :- woman(X),married(X,H),mother(S,H).
-	svyokr(S,X) :- woman(X),married(X,H),father(S,H).
-	tesha(T,X) :- man(X),married(W,X),mother(T,W).
-	test(T,X) :- man(X),married(W,X),father(T,W).
-	svatya(S, P) :- mother(S,W),married(W,H),parent(P,H);mother(S,H),married(W,H),parent(P,W).
-	svat(S,P) :- father(S,W),married(W,H),parent(P,H);father(S,H),married(W,H),parent(P,W).
-	svoyachenica(S, X) :- married(W,X),sister(S,W).
-	shurin(S, X) :- married(W,X),brother(S,W).
-	zolovka(Z,X) :- married(X,H),sister(Z,H).
-	dever(D,X) :- married(X,H),brother(D,H).
-	snoha(S,P) :- svekrov(P,S);svyokr(P,S).
-	zyat(Z,X) :- tesha(X,Z);svoyachenica(X,Z);married(X,H),sister(ZL,H),married(ZL,Z);niece(N,X),married(N,Z).
-*/
+	uncle(UN, X) :-
+	brother(UN, P), parent(P, X);
+	husband(UN, AU), sister(AU, P), parent(P, X).
+
+	niece(N, X) :-
+	daughter(N, S), sister(S, X);
+	daughter(N, B), brother(B, X).	
+	
+	nephew(N, X) :-
+	son(N, S), sister(S, X);
+	son(N, B), brother(B, X).
+
+	svekrov(S, X) :- mother(S, H), husband(H, X).
+	svyokr(S, X) :- father(S, H), husband(H, X).
+	tesha(T, X) :- mother(T, W), wife(W, X).
+	test(T, X) :- father(T, W), wife(W, X).
+
+	svatya(S, P) :- 
+	mother(S, X), wife(W, X), parent(P, W);
+	mother(S, X), husband(H, X), parent(P, H).
+
+	svat(S, P) :-
+	father(S, X), wife(W, X), parent(P, W);
+	father(S, X), husband(H, X), parent(P, H). 
+
+	svoyachenica(S, X) :- sister(S, W), wife(W, X).
+	shurin(S, X) :- brother(S, W), wife(W, X).	
+	zolovka(Z, X) :- sister(Z, H), husband(H, X).
+	dever(D, X) :- brother(D, H), husband(H, X).
+
+	snoha(S, P) :- wife(S, SON), son(SON, P).
+	zyat(Z, X) :- 
+	husband(Z, D), daughter(D, X);
+	husband(Z, S), sister(S, X);
+	husband(Z, ZOLOVKA), zolovka(ZOLOVKA, X);
+	husband(Z, N), niece(N, X).
